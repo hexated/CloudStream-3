@@ -46,15 +46,10 @@ class WcofunProvider : MainAPI() {
         } else {
             var title = uri.substringAfter("$mainUrl/")
             title = when {
-                (title.contains("-season")) -> title.replace(
-                    Regex("-season-[0-9]+-episode-[0-9]+"),
-                    ""
-                )
-                title.contains("one-piece") || title.contains("boruto") -> title.replace(
-                    Regex("-episode-[0-9]+"),
-                    ""
-                )
-                title.contains("-episode") -> title.substringBefore("-episode")
+                (title.contains(Regex("-season-[0-9]+-episode"))) && title.contains("-dubbed") -> title.substringBefore("-season")
+                (title.contains(Regex("-season-[0-9]+-episode"))) && title.contains("-subbed") -> title.replace(Regex("-season-[0-9]+-episode-[0-9]+"), "")
+                title.contains("-subbed") -> title.replace(Regex("-episode-[0-9]+"), "")
+                title.contains("-dubbed") -> title.substringBefore("-episode")
                 else -> title
             }
             "$mainUrl/anime/$title"
@@ -84,7 +79,7 @@ class WcofunProvider : MainAPI() {
             data = mapOf("catara" to query, "konuara" to "series")
         ).document
 
-        return document.select("ul.items li").mapNotNull {
+        return document.select("div#sidebar_right2 li").mapNotNull {
             it.toSearchResult()
         }
     }

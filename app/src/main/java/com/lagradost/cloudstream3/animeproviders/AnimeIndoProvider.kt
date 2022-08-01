@@ -64,7 +64,7 @@ class AnimeIndoProvider : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/anime-terbaru/page/" to "Anime Terbaru",
-        "$mainUrl/donghua-terbaru/" to "Donghua Terbaru"
+        "$mainUrl/donghua-terbaru/page/" to "Donghua Terbaru"
     )
 
     override suspend fun getMainPage(

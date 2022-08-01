@@ -7,7 +7,6 @@ import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.M3u8Helper
 import org.jsoup.nodes.Element
-import java.util.ArrayList
 
 class DubokuProvider : MainAPI() {
     override var mainUrl = "https://www.duboku.tv"
