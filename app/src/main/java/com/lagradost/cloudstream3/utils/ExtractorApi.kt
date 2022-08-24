@@ -233,6 +233,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     // Streamhub(), cause Streamhub2() works
     Streamhub2(),
     Ssbstream(),
+    Sbthe(),
 
     FEmbed(),
     FeHD(),
@@ -262,6 +263,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     DoodWsExtractor(),
     DoodShExtractor(),
     DoodWatchExtractor(),
+    DoodWfExtractor(),
 
     AsianLoad(),
 
@@ -309,6 +311,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     Linkbox(),
     Acefile(),
     SpeedoStream(),
+    Zorofile(),
 
     YoutubeExtractor(),
     YoutubeShortLinkExtractor(),
