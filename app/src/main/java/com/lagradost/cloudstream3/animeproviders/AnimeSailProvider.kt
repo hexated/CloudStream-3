@@ -144,7 +144,6 @@ class AnimeSailProvider : MainAPI() {
                     Jsoup.parse(base64Decode(it.attr("data-em"))).select("iframe").attr("src")
                         ?: throw ErrorLoadingException("No iframe found")
                 )
-
                 when {
                     iframe.startsWith("$mainUrl/utils/player/arch/") || iframe.startsWith(
                         "$mainUrl/utils/player/race/"
@@ -171,6 +170,10 @@ class AnimeSailProvider : MainAPI() {
 //                    skip for now
 //                    iframe.startsWith("$mainUrl/utils/player/fichan/") -> ""
 //                    iframe.startsWith("$mainUrl/utils/player/blogger/") -> ""
+                    iframe.startsWith("https://aghanim.xyz/tools/redirect/") -> {
+                        val link = "https://rasa-cintaku-semakin-berantai.xyz/v/${iframe.substringAfter("id=").substringBefore("&token")}"
+                        loadExtractor(link, mainUrl, subtitleCallback, callback)
+                    }
                     iframe.startsWith("$mainUrl/utils/player/framezilla/") || iframe.startsWith("https://uservideo.xyz") -> {
                         request(iframe, ref = data).document.select("iframe").attr("src")
                             .let { link ->

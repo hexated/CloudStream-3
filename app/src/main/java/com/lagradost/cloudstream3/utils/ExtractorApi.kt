@@ -241,6 +241,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     DBfilm(),
     Luxubu(),
     LayarKaca(),
+    Rasacintaku(),
     //  WatchSB(), 'cause StreamSB.kt works
     Uqload(),
     Uqload1(),
