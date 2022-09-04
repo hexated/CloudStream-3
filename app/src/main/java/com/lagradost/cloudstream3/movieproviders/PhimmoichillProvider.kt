@@ -8,7 +8,6 @@ import com.lagradost.cloudstream3.mvvm.safeApiCall
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import java.net.URLDecoder
-import java.util.ArrayList
 
 class PhimmoichillProvider : MainAPI() {
     override var mainUrl = "https://phimmoichill.net"
@@ -144,22 +143,8 @@ class PhimmoichillProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
 
-        val document = app.get(data).document
-
-        val key = document.select("div#content script").mapNotNull { script ->
-            if (script.data().contains("filmInfo.episodeID =")) {
-                val id = script.data().substringAfter("filmInfo.episodeID = parseInt('")
-                    .substringBefore("');")
-                app.post(
-                    url = "$mainUrl/pmplayer.php",
-                    data = mapOf("qcao" to id),
-                    referer = data,
-                    headers = mapOf("X-Requested-With" to "XMLHttpRequest")
-                ).text.substringAfterLast("iniPlayers(\"").substringBefore("\",")
-            } else {
-                null
-            }
-        }.first()
+        val key = app.post("$mainUrl/pmplayer.php", data = mapOf("qcao" to data.substringAfterLast("-pm"), "sv" to "0")).text.substringAfterLast("iniPlayers(\"")
+            .substringBefore("\",")
 
         listOf(
             Pair("https://so-trym.topphimmoi.org/hlspm/$key", "PMFAST"),

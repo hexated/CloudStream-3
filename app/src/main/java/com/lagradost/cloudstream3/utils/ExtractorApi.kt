@@ -234,6 +234,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     Streamhub2(),
     Ssbstream(),
     Sbthe(),
+    Vidgomunime(),
 
     FEmbed(),
     FeHD(),
@@ -242,13 +243,14 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     Luxubu(),
     LayarKaca(),
     Rasacintaku(),
+    Fenet(),
     //  WatchSB(), 'cause StreamSB.kt works
     Uqload(),
     Uqload1(),
     Evoload(),
     Evoload1(),
     VoeExtractor(),
-    // UpstreamExtractor(), GenericM3U8.kt works
+     UpstreamExtractor(),
 
     Tomatomatela(),
     Cinestart(),
@@ -313,6 +315,9 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     Acefile(),
     SpeedoStream(),
     Zorofile(),
+    Streamplay(),
+    Mvidoo(),
+    Embedgram(),
 
     YoutubeExtractor(),
     YoutubeShortLinkExtractor(),

@@ -7,6 +7,11 @@ import com.lagradost.cloudstream3.utils.ExtractorApi
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.getQualityFromName
 
+class Fenet: XStreamCdn() {
+    override val name: String = "Fenet"
+    override val mainUrl: String = "https://fembed.net"
+}
+
 class Rasacintaku: XStreamCdn() {
     override val mainUrl: String = "https://rasa-cintaku-semakin-berantai.xyz"
 }

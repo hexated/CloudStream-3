@@ -7,6 +7,7 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addTrailer
 import com.lagradost.cloudstream3.mvvm.safeApiCall
 import com.lagradost.cloudstream3.network.WebViewResolver
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.M3u8Helper
 import com.lagradost.cloudstream3.utils.Qualities
@@ -124,17 +125,17 @@ class GomunimeProvider : MainAPI() {
         val status = getStatus(document.selectFirst(".spe > span")!!.ownText())
         val description = document.select("div[itemprop = description] > p").text()
         val trailer = document.selectFirst("div.embed-responsive noscript iframe")?.attr("src")
-        val episodes = parseJson<List<EpisodeElement>>(
+        val episodes = tryParseJson<List<EpisodeElement>>(
             Regex("var episodelist = (\\[.*])").find(
                 document.select(".bixbox.bxcl.epcheck > script").toString().trim()
             )?.groupValues?.get(1).toString().replace(Regex("""\\"""), "").trim()
-        ).map {
+        )?.map {
             val name =
                 Regex("(Episode\\s?[0-9]+)").find(it.epTitle.toString())?.groupValues?.getOrNull(0)
                     ?: it.epTitle
             val link = it.epLink
             Episode(link, name)
-        }.reversed()
+        }?.reversed()
 
         return newAnimeLoadResponse(title, url, TvType.Anime) {
             engName = title

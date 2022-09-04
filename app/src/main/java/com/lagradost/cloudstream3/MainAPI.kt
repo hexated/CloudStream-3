@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.lagradost.cloudstream3.animeproviders.*
-import com.lagradost.cloudstream3.liveproviders.EjaTv
+import com.lagradost.cloudstream3.liveproviders.*
 import com.lagradost.cloudstream3.metaproviders.CrossTmdbProvider
 import com.lagradost.cloudstream3.movieproviders.*
 import com.lagradost.cloudstream3.mvvm.logError
@@ -58,6 +58,7 @@ object APIHolder {
             PelisflixProvider(),
             SeriesflixProvider(),
             IHaveNoTvProvider(), // Documentaries provider
+            TopdocumentaryfilmsProvider(),
             VMoveeProvider(),
             AllMoviesForYouProvider(),
             VidEmbedProvider(),
@@ -67,6 +68,10 @@ object APIHolder {
             AsianLoadProvider(),
             AsiaFlixProvider(), // This should be removed in favor of asianembed.io, same source
             EjaTv(),
+            UseeTv(),
+            Tvtwofourseven(),
+            OnetwothreeTv(),
+            TimefourTv(),
             BflixProvider(),
             FmoviesToProvider(),
             SflixProProvider(),
@@ -111,7 +116,8 @@ object APIHolder {
             YomoviesProvider(),
             DubokuProvider(),
             KisskhProvider(),
-
+            Megafilmesonline(),
+            Hdfilmcehennemi(),
             // Metadata providers
             //TmdbProvider(),
             CrossTmdbProvider(),
@@ -150,6 +156,10 @@ object APIHolder {
             AnimeSailProvider(),
             TocanimeProvider(),
             WcofunProvider(),
+            Animexinax(),
+            TurkanimeProvider(),
+            Gomunimeis(),
+            Anizm(),
             //MultiAnimeProvider(),
             NginxProvider(),
             OlgplyProvider(),

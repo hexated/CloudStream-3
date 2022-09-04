@@ -60,10 +60,10 @@ class IdlixProvider : MainAPI() {
         }
     }
 
-    private fun Element.toSearchResult(): SearchResponse {
-        val title = this.selectFirst("h3 > a")!!.text().replace(Regex("\\(\\d{4}\\)"), "").trim()
+    private fun Element.toSearchResult(): SearchResponse? {
+        val title = this.selectFirst("h3 > a")?.text()?.replace(Regex("\\(\\d{4}\\)"), "")?.trim() ?: return null
         val href = getProperLink(this.selectFirst("h3 > a")!!.attr("href"))
-        val posterUrl = this.select("div.poster > img").attr("src").toString()
+        val posterUrl = fixUrlNull(this.select("div.poster > img").attr("src"))
         val quality = getQualityFromString(this.select("span.quality").text())
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
