@@ -165,7 +165,7 @@ class ProviderTests {
             getAllProviders().apmap { api ->
                 if (api.hasMainPage) {
                     try {
-                        val homepage = api.getMainPage()
+                        val homepage = api.getMainPage(1, MainPageRequest("", ""))
                         when {
                             homepage == null -> {
                                 Assert.fail("Homepage provider ${api.name} did not correctly load homepage!")
