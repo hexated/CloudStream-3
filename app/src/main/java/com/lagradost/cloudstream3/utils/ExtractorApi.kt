@@ -235,6 +235,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     Ssbstream(),
     Sbthe(),
     Vidgomunime(),
+    Sbflix(),
 
     FEmbed(),
     FeHD(),
@@ -318,6 +319,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     Streamplay(),
     Mvidoo(),
     Embedgram(),
+    Gdriveplayer(),
 
     YoutubeExtractor(),
     YoutubeShortLinkExtractor(),

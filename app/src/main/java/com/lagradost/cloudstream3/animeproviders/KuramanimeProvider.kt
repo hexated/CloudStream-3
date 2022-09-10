@@ -80,20 +80,11 @@ class KuramanimeProvider : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val link = "$mainUrl/anime?search=$query&order_by=oldest"
+        val link = "$mainUrl/anime?search=$query&order_by=latest"
         val document = app.get(link).document
 
-        return document.select(".product__item").mapNotNull {
-            val title = it.selectFirst("div.product__item__text > h5")!!.text().trim()
-            val poster = it.selectFirst("a > div")!!.attr("data-setbg")
-            val tvType =
-                getType(it.selectFirst(".product__item__text > ul > li")!!.text().toString())
-            val href = fixUrl(it.selectFirst("a")!!.attr("href"))
-
-            newAnimeSearchResponse(title, href, tvType) {
-                this.posterUrl = poster
-                addDubStatus(dubExist = false, subExist = true)
-            }
+        return document.select("div#animeList div.col-lg-4.col-md-6.col-sm-6").mapNotNull {
+            it.toSearchResult()
         }
     }
 
@@ -164,7 +155,10 @@ class KuramanimeProvider : MainAPI() {
                         name,
                         url,
                         referer = "$mainUrl/",
-                        quality = quality
+                        quality = quality,
+                        headers = mapOf(
+                            "Range" to "bytes=0-"
+                        )
                     )
                 )
             }
