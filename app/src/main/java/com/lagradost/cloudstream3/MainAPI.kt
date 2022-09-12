@@ -104,6 +104,7 @@ object APIHolder {
             FilmpertuttiProvider(),
             HDMovie5(),
             RebahinProvider(),
+            Kitanonton(),
             LayarKacaProvider(),
             HDTodayProvider(),
             OpenVidsProvider(),
@@ -118,6 +119,7 @@ object APIHolder {
             KisskhProvider(),
             Megafilmesonline(),
             Hdfilmcehennemi(),
+            Movierulzhd(),
             // Metadata providers
             //TmdbProvider(),
             CrossTmdbProvider(),
@@ -160,13 +162,18 @@ object APIHolder {
             TurkanimeProvider(),
             Gomunimeis(),
             Anizm(),
+            Hentaiheaven(),
+            Animixplay(),
             //MultiAnimeProvider(),
             NginxProvider(),
             OlgplyProvider(),
             AniflixProvider(),
             KimCartoonProvider(),
             XcineProvider(),
-            SuperStream()
+            SuperStream(),
+            GoodPorn(),
+            IMoviehd(),
+            Kissasian(),
         )
 
 

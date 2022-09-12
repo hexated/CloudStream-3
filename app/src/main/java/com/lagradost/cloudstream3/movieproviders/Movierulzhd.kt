@@ -1,10 +1,13 @@
 package com.lagradost.cloudstream3.movieproviders
 
+import android.util.Log
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.LoadResponse.Companion.addTrailer
+import com.lagradost.cloudstream3.movieproviders.SflixProvider.Companion.extractRabbitStream
 import com.lagradost.cloudstream3.mvvm.safeApiCall
+import com.lagradost.cloudstream3.utils.AppUtils
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.nodes.Element
@@ -33,9 +36,10 @@ class Movierulzhd : MainAPI() {
         request: MainPageRequest
     ): HomePageResponse {
         val document = app.get(request.data + page).document
-        val home = document.select("div.items.normal article, div#archive-content article").mapNotNull {
-            it.toSearchResult()
-        }
+        val home =
+            document.select("div.items.normal article, div#archive-content article").mapNotNull {
+                it.toSearchResult()
+            }
         return newHomePageResponse(request.name, home)
     }
 
@@ -156,6 +160,44 @@ class Movierulzhd : MainAPI() {
         }
     }
 
+    private suspend fun invokeTwoEmbed(
+        url: String,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val server = "https://rabbitstream.net"
+        val document = app.get(url).document
+        val captchaKey =
+            document.select("script[src*=https://www.google.com/recaptcha/api.js?render=]")
+                .attr("src").substringAfter("render=")
+
+        val servers = document.select(".dropdown-menu a[data-id]").map { it.attr("data-id") }
+        servers.apmap { serverID ->
+            val token = APIHolder.getCaptchaToken(url, captchaKey)
+            val ajax = app.get(
+                "$server/ajax/embed/getSources?id=$serverID&_token=$token",
+                referer = url,
+                headers = mapOf("X-Requested-With" to "XMLHttpRequest")
+            ).text
+            val mappedservers = AppUtils.parseJson<EmbedJson>(ajax)
+            val iframeLink = mappedservers.link
+            if (iframeLink.contains("rabbitstream")) {
+                extractRabbitStream(iframeLink, subtitleCallback, callback, false) { it }
+            } else {
+                loadExtractor(iframeLink, url, subtitleCallback, callback)
+            }
+        }
+
+    }
+
+    private suspend fun invokeDatabase(
+        url: String,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+
+    }
+
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
@@ -178,19 +220,41 @@ class Movierulzhd : MainAPI() {
                         "post" to id,
                         "nume" to nume,
                         "type" to type
-                    )
+                    ),
+                    referer = data,
+                    headers = mapOf("X-Requested-With" to "XMLHttpRequest")
                 ).parsed<ResponseHash>().embed_url
-
-                loadExtractor(source, data, subtitleCallback, callback)
+                Log.i("hexated", source)
+                when {
+                    source.startsWith("https://www.2embed.to") -> {
+                        invokeTwoEmbed(source, callback, subtitleCallback)
+                    }
+//                    source.startsWith("https://series.databasegdriveplayer.co") -> {
+//                        invokeDatabase(source, callback, subtitleCallback)
+//                    }
+                    else -> loadExtractor(source, data, subtitleCallback, callback)
+                }
             }
         }
 
         return true
     }
 
+    override suspend fun extractorVerifierJob(extractorData: String?) {
+        Log.d(this.name, "Starting ${this.name} job!")
+        SflixProvider.runSflixExtractorVerifierJob(this, extractorData, "https://rabbitstream.net/")
+    }
+
     data class ResponseHash(
         @JsonProperty("embed_url") val embed_url: String,
         @JsonProperty("type") val type: String?,
+    )
+
+    data class EmbedJson(
+        @JsonProperty("type") val type: String?,
+        @JsonProperty("link") val link: String,
+        @JsonProperty("sources") val sources: List<String?>,
+        @JsonProperty("tracks") val tracks: List<String>?
     )
 
 }

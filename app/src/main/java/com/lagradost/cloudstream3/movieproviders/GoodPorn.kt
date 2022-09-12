@@ -2,9 +2,13 @@ package com.lagradost.cloudstream3.movieproviders
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
+import com.lagradost.cloudstream3.mvvm.safeApiCall
+import com.lagradost.cloudstream3.mvvm.suspendSafeApiCall
 import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.getQualityFromName
 import org.jsoup.nodes.Element
+import java.util.*
 
 class GoodPorn : MainAPI() {
     override var mainUrl = "https://goodporn.to"
@@ -20,9 +24,12 @@ class GoodPorn : MainAPI() {
         "$mainUrl/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=post_date&from=" to "New Videos",
         "$mainUrl/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=video_viewed&from=" to "Most Viewed Videos",
         "$mainUrl/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=rating&from=" to "Top Rated Videos ",
-        "$mainUrl/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=most_commented&from=" to "Most Commented Videos ",
+        "$mainUrl/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=most_commented&from=" to "Most Commented Videos",
         "$mainUrl/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=duration&from=" to "Longest Videos",
-        "$mainUrl/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=most_favourited&from=" to "Most Favourited Videos ",
+        "$mainUrl/channels/brazzers/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=post_date&from=" to "Brazzers",
+        "$mainUrl/channels/digitalplayground/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=post_date&from=" to "Digital Playground",
+        "$mainUrl/channels/realitykings/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=post_date&from=" to "Realitykings",
+        "$mainUrl/channels/babes-network/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=post_date&from=" to "Babes Network",
     )
 
     override suspend fun getMainPage(
@@ -30,7 +37,7 @@ class GoodPorn : MainAPI() {
         request: MainPageRequest
     ): HomePageResponse {
         val document = app.get(request.data + page).document
-        val home = document.select("div#list_videos_most_recent_videos_items div.item").mapNotNull {
+        val home = document.select("div#list_videos_most_recent_videos_items div.item, div#list_videos_common_videos_list_items div.item").mapNotNull {
             it.toSearchResult()
         }
         return newHomePageResponse(
@@ -72,7 +79,7 @@ class GoodPorn : MainAPI() {
         val actors = document.select("div.info div:nth-child(6) > a").map { it.text() }
 
         val recommendations =
-            document.select("div.list_videos_related_videos_items div.item").mapNotNull {
+            document.select("div#list_videos_related_videos_items div.item").mapNotNull {
                 it.toSearchResult()
             }
 
@@ -85,6 +92,20 @@ class GoodPorn : MainAPI() {
         }
     }
 
+    private fun getQuality(quality: String?): Int {
+        return when {
+            quality?.isBlank() == true -> {
+                Qualities.P480.value
+            }
+            quality == "360" -> {
+                Qualities.P360.value
+            }
+            else -> {
+                getQualityFromName(quality)
+            }
+        }
+    }
+
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
@@ -93,14 +114,14 @@ class GoodPorn : MainAPI() {
     ): Boolean {
 
         val document = app.get(data).document
-        document.select("div.info div:last-child a").map {
+        document.select("div.info div:last-child a").map { res ->
             callback.invoke(
                 ExtractorLink(
                     this.name,
                     this.name,
-                    it.attr("href"),
+                    res.attr("href").replace(Regex("\\?download\\S+.mp4&"), "?") + "&rnd=${Date().time}" ,
                     referer = data,
-                    quality = Regex("([0-9]+p),").find(it.text())?.groupValues?.get(1)
+                    quality = Regex("([0-9]+p),").find(res.text())?.groupValues?.get(1)
                         .let { getQualityFromName(it) },
                     headers = mapOf("Range" to "bytes=0-"),
                 )

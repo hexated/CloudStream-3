@@ -12,7 +12,11 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class Gdriveplayer : ExtractorApi() {
+class DatabaseGdrive : Gdriveplayer() {
+    override var mainUrl = "https://series.databasegdriveplayer.co"
+}
+
+open class Gdriveplayer : ExtractorApi() {
     override val name = "Gdrive"
     override val mainUrl = "https://gdriveplayer.to"
     override val requiresReferer = false

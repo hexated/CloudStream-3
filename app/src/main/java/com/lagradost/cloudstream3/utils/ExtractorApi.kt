@@ -320,6 +320,7 @@ val extractorApis: Array<ExtractorApi> = arrayOf(
     Mvidoo(),
     Embedgram(),
     Gdriveplayer(),
+    DatabaseGdrive(),
 
     YoutubeExtractor(),
     YoutubeShortLinkExtractor(),

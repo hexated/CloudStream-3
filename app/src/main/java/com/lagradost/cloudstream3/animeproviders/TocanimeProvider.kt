@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addTrailer
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.Qualities
+import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.nodes.Element
 import java.util.*
 
@@ -39,7 +40,7 @@ class TocanimeProvider : MainAPI() {
         }
     }
 
-    override suspend fun getMainPage(page: Int, request : MainPageRequest): HomePageResponse {
+    override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val document = app.get(mainUrl).document
 
         val homePageList = ArrayList<HomePageList>()
@@ -61,7 +62,7 @@ class TocanimeProvider : MainAPI() {
         val posterUrl = fixUrlNull(this.selectFirst("div.card-item-img")?.attr("data-original"))
         val epNum = this.selectFirst("div.card-item-badget.rtl")?.text()?.let { eps ->
             val num = eps.filter { it.isDigit() }.toIntOrNull()
-            if(eps.contains("Preview")) {
+            if (eps.contains("Preview")) {
                 num?.minus(1)
             } else {
                 num
@@ -127,40 +128,46 @@ class TocanimeProvider : MainAPI() {
             headers = mapOf("Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"),
         ).document
 
-        document.select("script").apmap { script ->
+        document.select("script").map { script ->
             if (script.data().contains("var PnPlayer=")) {
                 val key = script.data().substringAfter("\"btsurl\":[[").substringBefore("]}]")
                     .replace("]", "").replace("\"", "").split(",")
                 val id = data.split("_").last().substringBefore(".html")
 
-                app.get(
-                    url = "$mainUrl/content/parseUrl?v=2&len=0&prefer=&ts=${Date().time}&item_id=$id&username=$id&sv=btsurl&${
+                listOf(
+                    "local" to "$mainUrl/content/parseUrl?v=2&len=0&prefer=&ts=${Date().time}&item_id=$id&username=$id&sv=btsurl&${
                         encode(
                             "bts_url[]"
                         )
-                    }=${
+                    }=${encode(key.first())}&sig=${key.last()}",
+                    "embed" to "$mainUrl/content/parseUrl?v=2&len=1&prefer=&ts=${Date().time}&item_id=$id&username=$id&sv=btsurl&${
                         encode(
-                            key.first()
+                            "bts_url[]"
                         )
-                    }&sig=${key.last()}",
-                    referer = data,
-                    headers = mapOf(
-                        "Accept" to "application/json, text/javascript, */*; q=0.01",
-                        "X-Requested-With" to "XMLHttpRequest"
-                    )
-                ).parsedSafe<Responses>()?.let { res ->
-                    callback.invoke(
-                        ExtractorLink(
-                            source = this.name,
-                            name = this.name,
-                            url = res.formats?.auto ?: return@let,
-                            referer = "$mainUrl/",
-                            quality = Qualities.Unknown.value,
-                            isM3u8 = true
-                        )
-                    )
+                    }=${encode(key.first())}&sig=${key.last()}"
+                ).apmap { (server, url) ->
+                    app.get(url).parsedSafe<Responses>()?.let { res ->
+                        if (server == "local") {
+                            callback.invoke(
+                                ExtractorLink(
+                                    source = this.name,
+                                    name = this.name,
+                                    url = res.formats?.auto ?: return@let,
+                                    referer = "$mainUrl/",
+                                    quality = Qualities.Unknown.value,
+                                    isM3u8 = true
+                                )
+                            )
+                        } else {
+                            loadExtractor(
+                                res.formats?.embed ?: return@let,
+                                data,
+                                subtitleCallback,
+                                callback
+                            )
+                        }
+                    }
                 }
-
             }
         }
 
@@ -168,11 +175,12 @@ class TocanimeProvider : MainAPI() {
     }
 
     data class Formats(
-        @JsonProperty("auto") val auto: String?,
+        @JsonProperty("auto") val auto: String? = null,
+        @JsonProperty("embed") val embed: String? = null,
     )
 
     data class Responses(
-        @JsonProperty("formats") val formats: Formats?,
+        @JsonProperty("formats") val formats: Formats? = null,
     )
 
 }
